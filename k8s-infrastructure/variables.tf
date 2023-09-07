@@ -16,17 +16,17 @@ variable "availability_zones" {
 }
 
 variable "private_subnet_cidr_blocks" {
-  default     = ["10.0.1.0/24", "10.0.2.0/24","10.0.3.0/24"]
+  default     = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
   description = "A list of CIDR ranges for private subnets."
 }
 
 variable "public_subnet_cidr_blocks" {
-  default     = ["10.0.4.0/24", "10.0.5.0/24","10.0.6.0/24"]
+  default     = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
   description = "A list of CIDR ranges for public subnets."
 }
 
 variable "db_subnet_cidr_blocks" {
-  default     = ["10.0.7.0/24", "10.0.8.0/24","10.0.9.0/24"]
+  default     = ["10.0.7.0/24", "10.0.8.0/24", "10.0.9.0/24"]
   description = "A list of CIDR ranges for db subnets."
 }
 
@@ -60,10 +60,10 @@ variable "postgres" {
 }
 
 variable "cluster_issuer" {
-	type = object({
-		private_key = string
-		email       = string
-	})
+  type = object({
+    private_key = string
+    email       = string
+  })
 }
 
 variable "ckan_storage" {}
