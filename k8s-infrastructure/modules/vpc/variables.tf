@@ -19,7 +19,11 @@ variable "cidr_block" {
   type        = string
   description = "The CIDR range for the entire VPC."
 }
-
+variable "sg_rds_cidr_block" {
+  default     = ["10.0.0.0/8"]
+  type        = list(string)
+  description = "The CIDR range for the RDS security Group"
+}
 variable "availability_zones" {
   default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
   description = "A list of availability zones for subnet placement."

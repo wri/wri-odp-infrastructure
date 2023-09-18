@@ -6,6 +6,7 @@ module "ckan_vpc" {
   private_subnet_cidr_blocks = var.private_subnet_cidr_blocks
   public_subnet_cidr_blocks  = var.public_subnet_cidr_blocks
   db_subnet_cidr_blocks      = var.db_subnet_cidr_blocks
+  sg_rds_cidr_block          = var.sg_rds_cidr_block
 }
 
 module "ckan_eks" {
@@ -13,7 +14,7 @@ module "ckan_eks" {
   cluster_name          = var.cluster_name
   vpc_id                = module.ckan_vpc.vpc_id
   subnet_ids            = module.ckan_vpc.subnet_ids
-  aws_security_group_id = module.ckan_vpc.security_group_id
+  #aws_security_group_id = module.ckan_vpc.security_group_id
   vpc_owner_id          = module.ckan_vpc.owner_id
   cluster_issuer        = var.cluster_issuer
   project_env           = var.project_env

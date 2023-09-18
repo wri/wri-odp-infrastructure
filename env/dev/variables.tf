@@ -66,3 +66,9 @@ variable "db_subnet_cidr_blocks" {
   default     = ["10.0.7.0/24", "10.0.8.0/24", "10.0.9.0/24"]
   description = "A list of CIDR ranges for db subnets."
 }
+
+variable "sg_rds_cidr_block" {
+  default     = ["10.0.0.0/8"]
+  type        = list(string)
+  description = "The CIDR range for the RDS security Group"
+}

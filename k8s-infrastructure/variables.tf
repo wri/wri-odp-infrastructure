@@ -20,6 +20,12 @@ variable "private_subnet_cidr_blocks" {
   description = "A list of CIDR ranges for private subnets."
 }
 
+variable "sg_rds_cidr_block" {
+  default     = ["10.0.0.0/8"]
+  type        = list(string)
+  description = "The CIDR range for the RDS security Group"
+}
+
 variable "public_subnet_cidr_blocks" {
   default     = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
   description = "A list of CIDR ranges for public subnets."

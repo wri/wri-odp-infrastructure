@@ -3,7 +3,7 @@ variable "cluster_name" { }
 variable "ecr" {
   default = {
     scan_on_push = false
-    mutability   = "MUTABLE"
+    mutability   = "IMMUTABLE"
   }
 
   type = object({

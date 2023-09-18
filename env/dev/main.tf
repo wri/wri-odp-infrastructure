@@ -9,7 +9,7 @@ terraform {
 }
 
 provider "aws" {
-  region = var.aws_region
+  region  = var.aws_region
 }
 
 module "infrastructure" {
@@ -17,6 +17,7 @@ module "infrastructure" {
   availability_zones         = var.availability_zones
   private_subnet_cidr_blocks = var.private_subnet_cidr_blocks
   public_subnet_cidr_blocks  = var.public_subnet_cidr_blocks
+  sg_rds_cidr_block          = var.sg_rds_cidr_block
   db_subnet_cidr_blocks      = var.db_subnet_cidr_blocks
   project_env                = var.project_env
   postgres                   = var.postgres

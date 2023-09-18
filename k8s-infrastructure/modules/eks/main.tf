@@ -3,13 +3,13 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "19.16.0"
 
-  cluster_name    = var.cluster_name
-  cluster_version = "1.25"
+  cluster_name                    = var.cluster_name
+  cluster_version                 = "1.25"
   cluster_endpoint_private_access = true
-  cluster_endpoint_public_access = true
-  vpc_id     = var.vpc_id
-  subnet_ids = var.subnet_ids
-  enable_irsa = true
+  cluster_endpoint_public_access  = true
+  vpc_id                          = var.vpc_id
+  subnet_ids                      = var.subnet_ids
+  enable_irsa                     = true
   eks_managed_node_group_defaults = {
     ami_type                              = "AL2_x86_64"
     attach_cluster_primary_security_group = true
@@ -24,10 +24,7 @@ module "eks" {
 
       min_size     = 1
       max_size     = 5
-      desired_size = 2
-      vpc_security_group_ids = [
-        var.aws_security_group_id
-      ]
+      desired_size = 3
     }
   }
   manage_aws_auth_configmap = true
@@ -59,7 +56,7 @@ data "aws_eks_cluster_auth" "default" {
 }
 
 provider "kubernetes" {
-  host = data.aws_eks_cluster.default.endpoint
+  host                   = data.aws_eks_cluster.default.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.default.certificate_authority[0].data)
   token                  = data.aws_eks_cluster_auth.default.token
 

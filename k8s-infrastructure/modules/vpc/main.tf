@@ -29,32 +29,17 @@ module "vpc" {
 
 }
 
-resource "aws_security_group" "node_group_one" {
-  name_prefix = "node_group_one"
-  vpc_id      = module.vpc.vpc_id
-
-  ingress {
-    from_port = 22
-    to_port   = 22
-    protocol  = "tcp"
-
-    cidr_blocks = [
-      "10.0.0.0/8",
-    ]
-  }
-}
-
 resource "aws_security_group" "rds" {
   name_prefix = "ckan_db"
+  description = "Security group for the RDS instance"
   vpc_id      = module.vpc.vpc_id
 
   ingress {
+    description = "Allow traffic to the RDS instance"
     from_port = 5432
     to_port   = 5432
     protocol  = "tcp"
-    cidr_blocks = [
-      "10.0.0.0/8",
-    ]
+    cidr_blocks = var.sg_rds_cidr_block
   }
 }
 
@@ -64,10 +49,6 @@ output "db_subnet_group" {
 
 output "security_group_rds_id" {
   value = aws_security_group.rds.id
-}
-
-output "security_group_id" {
-  value = aws_security_group.node_group_one.id
 }
 
 output "vpc_id" {

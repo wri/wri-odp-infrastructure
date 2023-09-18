@@ -5,4 +5,4 @@ variable "storage" {
   default     = "ckan-storage"
 }
 
-variable "cluster_name" { }
+variable "cluster_name" {}
