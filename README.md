@@ -90,9 +90,9 @@ The `vpc` module takes care of provisioning a Virtual Private Cloud (VPC) and ne
 The module contains the following files with their functionalities:
 
 - `main.tf`: Uses the open-source module `terraform-aws-modules/vpc/aws` to deploy the VPC.
-- Uses a single NAT gateway and enables DNS hostname and DNS support.
-- Tags the VPC with the environment name.
-- Adds a security group to allow traffic to the RDS instance on port 5432.
+  - Uses a single NAT gateway and enables DNS hostname and DNS support.
+  - Tags the VPC with the environment name.
+  - Adds a security group to allow traffic to the RDS instance on port 5432.
 
 Each of these modules plays a crucial role in building and maintaining your Kubernetes-based infrastructure. In the following sections, we will delve into the specific configurations and usage of each module.
 
