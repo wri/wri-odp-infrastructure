@@ -31,9 +31,120 @@ The Terraform setup is organized into two main directories:
 
 2. **k8s-infrastructure**: This directory contains various modules for infrastructure provisioning. These modules are called from the `main.tf` file within the `k8s-infrastructure` directory, utilizing the variables provided by the `env/<env_name>` folder, where `terraform plan` and `terraform apply` commands are executed.
 
-## IAM Service Account
+## IAM Users and Service Accounts
 
 An IAM Service Account user for Terraform is added without console access, with least privilege permissions (only the permissions required for provisioning the needed components). It is created to provision the architecture with tags like "Purpose: Terraform Automation" and "Application: WRI ODP" to help differentiate between different service accounts.
+
+The users and service accounts are added manually to the IAM.
+
+### IAM Groups
+
+* wri-odp-devops (for devops)
+  * Users: Terraform service account (doesn't have console access) and devops engineer
+  * Purpose: The terraform service account and the devops engineer are a part of this group so that terraform can provision all the resources needed for the infrastructure and the devops engineer can manually intervene if something goes wrong and manual intervention is required to resolve the terraform runs.
+    * The terraform user can add/remove users but the users of the group wri-odp-devops don't have the access to manage IAM users, so the devops engineer is not going to have the IAM access other than just ReadOnlyAccess to check if the roles needed for the cluster are created/present if needed.
+* wri-odp-dev (for developers)
+  * Users: Developers
+  * Purpose: To provide all the devs the ability to assume the role “eks-admin“ so that they can access and perform activities on the eks cluster along with access to the buckets needed for development
+  * Permissions (ListAndReadIAMUser and S3 Access Policy)
+    * Full access to the EKS dev cluster via the eks-admin role (the users can assume the eks-admin)
+    * Access to the dev buckets only (Admin access for the dev CKAN buckets)
+
+### Policies Attached to the Users
+
+* **ListAndReadIAMUser:** This Policy allows the user to list the users but only manage their own IAM users so that they can create and handle API keys.
+    ```json
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "iam:ListUsers",
+                    "iam:ListRoles",
+                    "iam:ListGroups",
+                    "iam:ListPolicies",
+                    "iam:ListGroupPolicies",
+                    "iam:ListAttachedGroupPolicies"
+                ],
+                "Resource": [
+                    "*"
+                ]
+            },
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "iam:*"
+                ],
+                "Resource": [
+                    "arn:aws:iam::{account-id}:user/{user-arn}"
+                ]
+            }
+        ]
+    }
+    ```
+* **S3BucketAccessDev:** allows to list all buckets but full control over the dev bucket only
+    ```json
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "s3:ListBucket",
+                    "s3:ListAllMyBuckets",
+                    "s3:GetAccountPublicAccessBlock",
+                    "s3:GetBucketPublicAccessBlock",
+                    "s3:GetBucketPolicyStatus",
+                    "s3:GetBucketAcl",
+                    "s3:ListAccessPoints"
+                ],
+                "Resource": [
+                    ""
+                ]
+            },
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "s3:"
+                ],
+                "Resource": [
+                    "arn:aws:s3:::{storage bucket}",
+                    "arn:aws:s3:::{storage bucket}/*"
+                ]
+            }
+        ]
+    }
+    ```
+
+### IAM Roles
+
+* `eks-admin`  (for RBAC access to eks cluster as an admin, the users can assume this role)
+  * Has full eks access to the dev cluster only.
+* `github-actions-oidc-role` is also added to enable github actions to deploy to EKS using OIDC instead of storing long-lived credentials as secrets. The name of the github org/repo is added in the trust policy attached to the role i.e.`"token.actions.githubusercontent.com:sub": "repo:wri/wri-odp:*"`
+    * The policies attached to the role for EKS access and ECR access (pushing docker images). The usage of this role can be viewed [`main.yml`](..github/workflows/main.yml#L125). It connects to the AWS cluster as eks-admin role. For more info. regarding OIDC with AWS, the docs are available [here](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services).
+* A service account `sa-ckan-dev-s3` is added to enable s3 storage for ckan with only access to the dev bucket.
+
+### Instructions to connect to AWS cluster
+
+
+* Create Access Keys for your IAM user by navigating to the Security Credentials tab for your IAM user and store them locally
+* Run the command (You would need to install aws cli if not already present on your machine)
+    ```
+    aws configure --profile wri-aws
+    ```
+* Enter your access keys when prompted by the above command
+* Once configure is complete edit the file `~/.aws/config` and add the following lines at the end and save
+    ```
+    [profile eks-admin]
+    role_arn = arn:aws:iam::{account_id}:role/{role_name}
+    source_profile = wri-aws
+    ```
+* Once that is done, now your IAM user should be able to assume the `eks-admin`` role to connect to the eks cluster by running the command
+    ```
+    aws eks update-kubeconfig --name {cluster-name} --region {region-name} --profile eks-admin
+    ```
+* Now you should be able to access the cluster through your kubectl command line tool.
 
 ## k8s-infrastructure Modules
 
