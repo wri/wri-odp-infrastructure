@@ -18,7 +18,7 @@ module "allow_eks_access_iam_policy" {
     ]
   })
 }
-variable "vpc_owner_id" {}
+
 module "eks_admins_iam_role" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
   version = "5.3.1"
@@ -34,7 +34,7 @@ module "eks_admins_iam_role" {
   ]
 }
 
-module "dev_iam_user" {
+/* module "dev_iam_user" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-user"
   version = "5.3.1"
 
@@ -43,7 +43,7 @@ module "dev_iam_user" {
   create_iam_user_login_profile = false
 
   force_destroy = true
-}
+} */
 
 module "allow_assume_eks_admins_iam_policy" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-policy"
@@ -66,13 +66,16 @@ module "allow_assume_eks_admins_iam_policy" {
   })
 }
 
-module "eks_admins_iam_group" {
+module "eks_dev_group" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-group-with-policies"
   version = "5.3.1"
 
-  name                              = "eks-admin"
+  name                              = "wri-odp-dev"
   attach_iam_self_management_policy = false
   create_group                      = true
-  group_users                       = [module.dev_iam_user.iam_user_name]
+  #group_users                       = [module.dev_iam_user.iam_user_name]
   custom_group_policy_arns          = [module.allow_assume_eks_admins_iam_policy.arn]
+  tags = {
+    Description = "This group is managed by terraform for granting access to the devs to the k8s cluster"
+  }
 }
