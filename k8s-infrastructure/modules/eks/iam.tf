@@ -11,6 +11,7 @@ module "allow_eks_access_iam_policy" {
       {
         Action = [
           "eks:DescribeCluster",
+          "eks:ListClusters"
         ]
         Effect   = "Allow"
         Resource = "*"
