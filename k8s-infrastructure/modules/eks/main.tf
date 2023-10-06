@@ -66,10 +66,6 @@ provider "kubernetes" {
   }
 }
 
-
-/* output "test-out" {
-  value = data.aws_eks_cluster.default.endpoint
-} */
 output "eks_oidc" {
   value = module.eks.oidc_provider_arn
 }
