@@ -75,7 +75,7 @@ module "eks_dev_group" {
   attach_iam_self_management_policy = false
   create_group                      = true
   #group_users                       = [module.dev_iam_user.iam_user_name]
-  custom_group_policy_arns          = [module.allow_assume_eks_admins_iam_policy.arn]
+  custom_group_policy_arns = [module.allow_assume_eks_admins_iam_policy.arn]
   tags = {
     Description = "This group is managed by terraform for granting access to the devs to the k8s cluster"
   }

@@ -36,9 +36,9 @@ resource "aws_security_group" "rds" {
 
   ingress {
     description = "Allow traffic to the RDS instance"
-    from_port = 5432
-    to_port   = 5432
-    protocol  = "tcp"
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
     cidr_blocks = var.sg_rds_cidr_block
   }
 }

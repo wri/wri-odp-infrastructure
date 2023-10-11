@@ -10,29 +10,31 @@ variable "s3_cluster_name" {
 
 variable "postgres" {
   default = {
-    instance_name      = "dx-ckan-db"
-    family             = "postgres11"
-    instance_class     = "db.t3.micro"
-    instance_version   = "11.19"
-    database_name      = "ckan"
-    database_user_name = "postgres"
-    allocated_storage  = "5"
-    backup_retention   = 7
-    maintenance_window = "Mon:00:00-Mon:03:00"
-    backup_window      = "03:00-06:00"
+    instance_name         = "dx-ckan-db"
+    family                = "postgres15"
+    instance_class        = "db.t3.small"
+    instance_version      = "15.4"
+    database_name         = "ckan"
+    database_user_name    = "postgres"
+    allocated_storage     = "100"
+    max_allocated_storage = "150"
+    backup_retention      = 7
+    maintenance_window    = "Mon:00:00-Mon:03:00"
+    backup_window         = "03:00-06:00"
   }
 
   type = object({
-    instance_name      = string
-    family             = string
-    instance_class     = string
-    database_name      = string
-    instance_version   = string
-    database_user_name = string
-    allocated_storage  = string
-    maintenance_window = string
-    backup_window      = string
-    backup_retention   = number
+    instance_name         = string
+    family                = string
+    instance_class        = string
+    database_name         = string
+    instance_version      = string
+    database_user_name    = string
+    allocated_storage     = string
+    max_allocated_storage = string
+    maintenance_window    = string
+    backup_window         = string
+    backup_retention      = number
   })
 
 }
@@ -74,6 +76,6 @@ variable "sg_rds_cidr_block" {
 }
 
 variable "bucket_names" {
-  type = list(string)
+  type    = list(string)
   default = ["ckan-dev-storage"]
 }

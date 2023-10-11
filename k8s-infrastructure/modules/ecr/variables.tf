@@ -1,4 +1,4 @@
-variable "cluster_name" { }
+variable "cluster_name" {}
 
 variable "ecr" {
   default = {
