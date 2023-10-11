@@ -72,3 +72,8 @@ variable "sg_rds_cidr_block" {
   type        = list(string)
   description = "The CIDR range for the RDS security Group"
 }
+
+variable "bucket_names" {
+  type = list(string)
+  default = ["ckan-dev-storage"]
+}

@@ -33,6 +33,7 @@ module "ckan_storage" {
   source       = "./modules/s3"
   storage      = var.ckan_storage
   cluster_name = var.cluster_name
+  bucket_names = var.bucket_names
 
 }
 

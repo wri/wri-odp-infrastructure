@@ -24,6 +24,7 @@ module "infrastructure" {
   ckan_storage               = var.s3_ckan_storage
   cluster_name               = var.s3_cluster_name
   cluster_issuer             = var.cluster_issuer
+  bucket_names               = var.bucket_names
 }
 
 

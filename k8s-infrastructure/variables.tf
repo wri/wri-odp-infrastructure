@@ -74,3 +74,7 @@ variable "cluster_issuer" {
 
 variable "ckan_storage" {}
 variable "cluster_name" {}
+
+variable "bucket_names" {
+  type = list(string)
+}
