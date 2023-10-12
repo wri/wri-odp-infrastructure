@@ -7,8 +7,8 @@ module "db" {
   engine_version = var.postgres.instance_version
   instance_class = var.postgres.instance_class
 
-  allocated_storage = var.postgres.allocated_storage
-
+  allocated_storage       = var.postgres.allocated_storage
+  max_allocated_storage   = var.postgres.max_allocated_storage
   backup_retention_period = var.postgres.backup_retention
   maintenance_window      = var.postgres.maintenance_window
   backup_window           = var.postgres.backup_window

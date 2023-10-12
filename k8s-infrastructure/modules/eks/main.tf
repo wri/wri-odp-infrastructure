@@ -42,7 +42,6 @@ module "eks" {
 }
 
 
-# https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2009
 data "aws_eks_cluster" "default" {
   #name = module.eks.cluster_name
   name = var.cluster_name
@@ -67,10 +66,6 @@ provider "kubernetes" {
   }
 }
 
-
-output "test-out" {
-  value = data.aws_eks_cluster.default.endpoint
-}
 output "eks_oidc" {
   value = module.eks.oidc_provider_arn
 }

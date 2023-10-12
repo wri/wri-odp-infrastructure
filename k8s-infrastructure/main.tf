@@ -10,14 +10,14 @@ module "ckan_vpc" {
 }
 
 module "ckan_eks" {
-  source                = "./modules/eks"
-  cluster_name          = var.cluster_name
-  vpc_id                = module.ckan_vpc.vpc_id
-  subnet_ids            = module.ckan_vpc.subnet_ids
+  source       = "./modules/eks"
+  cluster_name = var.cluster_name
+  vpc_id       = module.ckan_vpc.vpc_id
+  subnet_ids   = module.ckan_vpc.subnet_ids
   #aws_security_group_id = module.ckan_vpc.security_group_id
-  vpc_owner_id          = module.ckan_vpc.owner_id
-  cluster_issuer        = var.cluster_issuer
-  project_env           = var.project_env
+  vpc_owner_id   = module.ckan_vpc.owner_id
+  cluster_issuer = var.cluster_issuer
+  project_env    = var.project_env
 
 }
 
@@ -33,6 +33,7 @@ module "ckan_storage" {
   source       = "./modules/s3"
   storage      = var.ckan_storage
   cluster_name = var.cluster_name
+  bucket_names = var.bucket_names
 
 }
 
