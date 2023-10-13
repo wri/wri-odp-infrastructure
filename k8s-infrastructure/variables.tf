@@ -80,3 +80,7 @@ variable "cluster_name" {}
 variable "bucket_names" {
   type = list(string)
 }
+
+variable "ecr_repositories" {
+  type = list(string)
+}

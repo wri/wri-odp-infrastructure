@@ -11,3 +11,7 @@ variable "ecr" {
     mutability   = string
   })
 }
+
+variable "ecr_repositories" {
+  type = list(string)
+}
