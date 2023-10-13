@@ -81,6 +81,6 @@ variable "bucket_names" {
 }
 
 variable "ecr_repositories" {
-  type = list(string)
-  default = ["ckan-ecr","frontend-ecr","datapusher-ecr"]
+  type    = list(string)
+  default = ["ckan-ecr", "frontend-ecr", "datapusher-ecr"]
 }
