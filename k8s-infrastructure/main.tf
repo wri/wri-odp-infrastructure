@@ -38,7 +38,8 @@ module "ckan_storage" {
 }
 
 module "ckan_ecr" {
-  source       = "./modules/ecr"
-  cluster_name = var.cluster_name
+  source           = "./modules/ecr"
+  cluster_name     = var.cluster_name
+  ecr_repositories = var.ecr_repositories
 }
 
