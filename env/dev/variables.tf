@@ -41,7 +41,7 @@ variable "postgres" {
 
 variable "cluster_issuer" {
   default = {
-    private_key = "key"
+    #private_key = "key"
     email       = "test@email.com"
   }
 }

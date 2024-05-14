@@ -69,7 +69,7 @@ variable "postgres" {
 
 variable "cluster_issuer" {
   type = object({
-    private_key = string
+    #private_key = string
     email       = string
   })
 }

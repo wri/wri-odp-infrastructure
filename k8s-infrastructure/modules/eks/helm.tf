@@ -48,7 +48,7 @@ resource "helm_release" "ngnix_ingress" {
 
 variable "cluster_issuer" {
   type = object({
-    private_key = string
+    #private_key = string
     email       = string
   })
 }
@@ -57,5 +57,5 @@ module "cert_manager" {
   source                                 = "terraform-iaac/cert-manager/kubernetes"
   version                                = "2.6.0"
   cluster_issuer_email                   = var.cluster_issuer.email
-  cluster_issuer_private_key_secret_name = var.cluster_issuer.private_key
+  #cluster_issuer_private_key_secret_name = var.cluster_issuer.private_key
 }

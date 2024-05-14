@@ -31,6 +31,22 @@ The Terraform setup is organized into two main directories:
 
 2. **k8s-infrastructure**: This directory contains various modules for infrastructure provisioning. These modules are called from the `main.tf` file within the `k8s-infrastructure` directory, utilizing the variables provided by the `env/<env_name>` folder, where `terraform plan` and `terraform apply` commands are executed.
 
+## Usage
+
+### How to deploy
+
+1. Clone the repository locally and ensure that you have the credentials for the Terraform user already set up in your environment. You can use the terraform service account user key (can be created through IAM) to get connected.
+
+2. Navigate to the `env` directory corresponding to your working environment (e.g., `cd env/dev`).
+
+3. Add the necessary environment variables in `.auto.tfvars`. Available in the [secrets repo](https://github.com/wri/wri-odp-secrets/blob/main/infrastructure/.auto.tfvars)
+
+4. Run `terraform plan -var-file=.auto.tfvars`. For example, if you are in the `env/dev` directory, run `terraform plan` after adding `.auto.tfvars`.
+
+5. Run `terraform apply -var-file=.auto.tfvars` once everything in the plan seems satisfactory.
+
+These steps will allow you to deploy and manage the infrastructure efficiently.
+
 ## IAM Users and Service Accounts
 
 An IAM Service Account user for Terraform is added without console access, with least privilege permissions (only the permissions required for provisioning the needed components). It is created to provision the architecture with tags like "Purpose: Terraform Automation" and "Application: WRI ODP" to help differentiate between different service accounts.
@@ -207,18 +223,3 @@ The module contains the following files with their functionalities:
 
 Each of these modules plays a crucial role in building and maintaining your Kubernetes-based infrastructure. In the following sections, we will delve into the specific configurations and usage of each module.
 
-## Usage
-
-### How to deploy
-
-1. Clone the repository locally and ensure that you have the credentials for the Terraform user already set up in your environment.
-
-2. Navigate to the `env` directory corresponding to your working environment (e.g., `cd env/dev`).
-
-3. Add the necessary environment variables in `.auto.tfvars`.
-
-4. Run `terraform plan`. For example, if you are in the `env/dev` directory, run `terraform plan` after adding `.auto.tfvars`.
-
-5. Run `terraform apply` once everything in the plan seems satisfactory.
-
-These steps will allow you to deploy and manage the infrastructure efficiently.
