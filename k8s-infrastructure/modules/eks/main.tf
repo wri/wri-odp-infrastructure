@@ -23,7 +23,7 @@ module "eks" {
       instance_types = ["t3.xlarge"]
 
       min_size     = 1
-      max_size     = 5
+      max_size     = 6
       desired_size = 3
     }
   }
