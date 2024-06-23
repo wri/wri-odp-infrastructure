@@ -13,7 +13,7 @@ variable "postgres" {
     instance_name         = "dx-ckan-db"
     family                = "postgres15"
     instance_class        = "db.t3.small"
-    instance_version      = "15.4"
+    instance_version      = "15.5"
     database_name         = "ckan"
     database_user_name    = "postgres"
     allocated_storage     = "100"
@@ -41,7 +41,7 @@ variable "postgres" {
 
 variable "cluster_issuer" {
   default = {
-    private_key = "key"
+    #private_key = "key"
     email       = "test@email.com"
   }
 }

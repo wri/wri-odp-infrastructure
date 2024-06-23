@@ -16,9 +16,16 @@ module "db" {
   db_name  = var.postgres.database_name
   username = var.postgres.database_user_name
   port     = 5432
+  multi_az = true
 
   db_subnet_group_name = var.db_subnet_group
   vpc_security_group_ids = [
     var.security_group_rds_id
+  ]
+  parameters = [
+    {
+      name  = "idle_session_timeout"
+      value = "3600000"
+    }
   ]
 }
