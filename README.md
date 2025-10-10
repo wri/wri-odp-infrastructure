@@ -35,7 +35,12 @@ The Terraform setup is organized into two main directories:
 
 ### How to deploy
 
-1. Clone the repository locally and ensure that you have the credentials for the Terraform user already set up in your environment. You can use the terraform service account user key (can be created through IAM) to get connected.
+1. Clone the repository locally and ensure that you have the credentials for the Terraform user already set up in your environment. You can use the terraform service account user key (can be created through IAM) to get connected. For example:
+```
+export AWS_ACCESS_KEY_ID="YOUR_AWS_ACCESS_KEY_ID"
+export AWS_SECRET_ACCESS_KEY="YOUR_AWS_SECRET_ACCESS_KEY"
+export AWS_DEFAULT_REGION="us-east-1"
+```
 
 2. Navigate to the `env` directory corresponding to your working environment (e.g., `cd env/dev`).
 

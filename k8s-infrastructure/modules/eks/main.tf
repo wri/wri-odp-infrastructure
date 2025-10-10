@@ -4,7 +4,7 @@ module "eks" {
   version = "19.16.0"
 
   cluster_name                    = var.cluster_name
-  cluster_version                 = "1.25"
+  cluster_version                 = "1.32"
   cluster_endpoint_private_access = true
   cluster_endpoint_public_access  = true
   vpc_id                          = var.vpc_id
