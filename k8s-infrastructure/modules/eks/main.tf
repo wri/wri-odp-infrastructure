@@ -1,10 +1,11 @@
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "19.16.0"
+  version = "21.8.0"
 
   cluster_name                    = var.cluster_name
   cluster_version                 = "1.25"
+  authentication_mode             = "API_AND_CONFIG_MAP"
   cluster_endpoint_private_access = true
   cluster_endpoint_public_access  = true
   vpc_id                          = var.vpc_id
