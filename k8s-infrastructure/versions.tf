@@ -1,5 +1,6 @@
 provider "aws" {
   region = var.aws_region
+  profile = "wri-aws-terraform"
 }
 
 terraform {
@@ -10,7 +11,7 @@ terraform {
     }
     helm = {
       source  = "hashicorp/helm"
-      version = ">= 2.11.0"
+      version = "~> 3.0.2"
     }
   }
   required_version = "~> 1.5"

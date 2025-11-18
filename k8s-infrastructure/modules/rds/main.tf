@@ -26,6 +26,11 @@ module "db" {
     {
       name  = "idle_session_timeout"
       value = "3600000"
+    },
+    {
+      name = "max_connections"
+      value = "1000"
+      apply_method = "pending-reboot"
     }
   ]
 }

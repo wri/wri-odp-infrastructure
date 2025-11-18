@@ -1,9 +1,9 @@
 provider "helm" {
-  kubernetes {
+  kubernetes =   {
     host                   = data.aws_eks_cluster.default.endpoint
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.default.certificate_authority[0].data)
     token                  = data.aws_eks_cluster_auth.default.token
-    exec {
+    exec = {
       api_version = "client.authentication.k8s.io/v1beta1"
       args        = ["eks", "get-token", "--cluster-name", var.cluster_name]
       command     = "aws"
@@ -15,6 +15,7 @@ resource "helm_release" "sealed_secrets" {
   name       = "sealed-secrets-controller"
   repository = "https://charts.bitnami.com/bitnami"
   chart      = "sealed-secrets"
+  version    = "1.5.2"
 }
 
 resource "helm_release" "ngnix_ingress" {
@@ -22,28 +23,25 @@ resource "helm_release" "ngnix_ingress" {
   chart      = "ingress-nginx"
   repository = "https://kubernetes.github.io/ingress-nginx"
   namespace  = "nginx-ingress"
-  version    = "4.4.0"
+  version    = "4.10.1"
 
-  set {
+  set = [ {
     name  = "rbac.create"
     value = true
-  }
-
-  set {
+  },
+  {
     name  = "controller.service.externalTrafficPolicy"
     value = "Local"
-  }
-
-  set {
+  },
+  {
     name  = "controller.publishService.enabled"
     value = true
-  }
-
-  set {
+  },
+  {
     name  = "controller.replicaCount"
     value = "3"
-  }
-}
+  }]
+} 
 
 
 variable "cluster_issuer" {
@@ -55,7 +53,7 @@ variable "cluster_issuer" {
 
 module "cert_manager" {
   source                                 = "terraform-iaac/cert-manager/kubernetes"
-  version                                = "2.6.0"
+  version                                = "3.0.1"
   cluster_issuer_email                   = var.cluster_issuer.email
   #cluster_issuer_private_key_secret_name = var.cluster_issuer.private_key
 }

@@ -40,8 +40,8 @@ variable "postgres" {
   default = {
     instance_name         = "dx-ckan-db"
     family                = "postgres15"
-    instance_class        = "db.t3.small"
-    instance_version      = "15.5"
+    instance_class        = "db.m5.large"
+    instance_version      = "15.12"
     database_name         = "ckan"
     database_user_name    = "postgres"
     allocated_storage     = "100"
@@ -84,3 +84,5 @@ variable "bucket_names" {
 variable "ecr_repositories" {
   type = list(string)
 }
+
+variable "csi_driver_addon_version"{}

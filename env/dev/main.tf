@@ -10,6 +10,7 @@ terraform {
 
 provider "aws" {
   region  = var.aws_region
+  profile = "wri-aws-terraform"
 }
 
 module "infrastructure" {
@@ -26,6 +27,7 @@ module "infrastructure" {
   cluster_issuer             = var.cluster_issuer
   bucket_names               = var.bucket_names
   ecr_repositories           = var.ecr_repositories
+  csi_driver_addon_version   = var.csi_driver_addon_version
 }
 
 
