@@ -2,7 +2,7 @@ variable "postgres" {
   default = {
     instance_name         = "dx-ckan-db"
     family                = "postgres11"
-    instance_class        = "db.t3.small"
+    instance_class        = "db.m5.large"
     instance_version      = "11.19"
     database_name         = "ckan"
     database_user_name    = "postgres"

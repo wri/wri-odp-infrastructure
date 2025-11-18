@@ -18,6 +18,7 @@ module "ckan_eks" {
   vpc_owner_id   = module.ckan_vpc.owner_id
   cluster_issuer = var.cluster_issuer
   project_env    = var.project_env
+  csi_driver_addon_version = var.csi_driver_addon_version
 
 }
 

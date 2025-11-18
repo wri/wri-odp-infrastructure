@@ -173,7 +173,7 @@ spec:
         fsGroup: 65534
       serviceAccountName: cluster-autoscaler
       containers:
-        - image: registry.k8s.io/autoscaling/cluster-autoscaler:v1.25.3
+        - image: registry.k8s.io/autoscaling/cluster-autoscaler:v1.32.3
           name: cluster-autoscaler
           resources:
             limits:
