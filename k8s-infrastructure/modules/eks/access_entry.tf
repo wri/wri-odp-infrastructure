@@ -17,7 +17,7 @@ data aws_iam_roles admin_arn {
 resource "aws_eks_access_entry" "admin_role" {
   for_each = data.aws_iam_roles.admin_arn.arns
 
-  cluster_name  = aws_eks_cluster.eks_cluster.name
+  cluster_name  = var.cluster_name
   principal_arn = each.value
   type          = "STANDARD"
 
