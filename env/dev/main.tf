@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket         = "wri-odp-tfm-state-bucket"
-    use_lockfile   = "tfm-state-lock"
+    dynamodb_table = "tfm-state-lock"
     key            = "global/statefile/terraform.state"
     region         = "us-east-1"
     encrypt        = true
