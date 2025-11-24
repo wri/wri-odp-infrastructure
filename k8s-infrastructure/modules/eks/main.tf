@@ -21,6 +21,16 @@ module "eks" {
       desired_size = 3
     }
   }
+
+  manage_aws_auth_configmap = true
+
+  aws_auth_roles = [
+    {
+      rolearn  = module.eks_admins_iam_role.iam_role_arn
+      username = module.eks_admins_iam_role.iam_role_name
+      groups   = ["system:masters"]
+    },
+  ]
   tags = {
     Environment = var.project_env
   }
