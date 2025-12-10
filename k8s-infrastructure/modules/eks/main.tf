@@ -10,6 +10,9 @@ module "eks" {
   vpc_id                          = var.vpc_id
   subnet_ids                      = var.subnet_ids
   enable_irsa                     = true
+  iam_role_additional_policies = {
+    eks_vpccontroller = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController",
+  }
   eks_managed_node_groups = {
     # Starting on 1.30, AL2023 is the default AMI type for EKS managed node groups
     one = {
@@ -27,7 +30,6 @@ module "eks" {
     Environment = var.project_env
   }
 }
-
 
 data "aws_eks_cluster" "default" {
   #name = module.eks.cluster_name
