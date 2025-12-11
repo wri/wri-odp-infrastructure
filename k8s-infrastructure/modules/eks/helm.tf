@@ -15,7 +15,6 @@ resource "helm_release" "sealed_secrets" {
   name       = "sealed-secrets-controller"
   repository = "https://charts.bitnami.com/bitnami"
   chart      = "sealed-secrets"
-  version    = "1.5.2"
 }
 
 resource "helm_release" "ngnix_ingress" {
@@ -23,7 +22,6 @@ resource "helm_release" "ngnix_ingress" {
   chart      = "ingress-nginx"
   repository = "https://kubernetes.github.io/ingress-nginx"
   namespace  = "nginx-ingress"
-  version    = "4.10.1"
 
   set = [ {
     name  = "rbac.create"

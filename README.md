@@ -19,9 +19,54 @@ These scripts enable the automated setup and management of the infrastructure co
 
 ## Remote State and State Locking
 
-The Terraform setup employs a remote backend for storing the state file. The remote state storage configuration is defined in the `backend.tf` file.
+The Terraform setup employs a remote backend for storing the state file. The remote state storage configuration is defined in the `main.tf` file in each environment directory.
+
+The state is stored in:
+- **S3 Bucket**: `wri-odp-tfm-state-bucket`
+- **DynamoDB Table**: `tfm-state-lock` (for state locking)
+- **State Key**: `global/statefile/terraform.state`
 
 Additionally, to ensure safe and concurrent access to the Terraform state, the [state locking](https://developer.hashicorp.com/terraform/language/state/locking) feature is enabled, leveraging DynamoDB for this purpose.
+
+### Required IAM Permissions for State Access
+
+To access the Terraform state, your AWS credentials must have the following permissions:
+
+**S3 Bucket Permissions:**
+- `s3:ListBucket` on `arn:aws:s3:::wri-odp-tfm-state-bucket`
+- `s3:GetObject` on `arn:aws:s3:::wri-odp-tfm-state-bucket/global/statefile/*`
+- `s3:PutObject` on `arn:aws:s3:::wri-odp-tfm-state-bucket/global/statefile/*`
+- `s3:DeleteObject` on `arn:aws:s3:::wri-odp-tfm-state-bucket/global/statefile/*`
+
+**DynamoDB Table Permissions:**
+- `dynamodb:GetItem` on `arn:aws:dynamodb:us-east-1:*:table/tfm-state-lock`
+- `dynamodb:PutItem` on `arn:aws:dynamodb:us-east-1:*:table/tfm-state-lock`
+- `dynamodb:DeleteItem` on `arn:aws:dynamodb:us-east-1:*:table/tfm-state-lock`
+
+### Troubleshooting State Access Issues
+
+If you encounter a `403 Forbidden` error when accessing the state file:
+
+1. **Verify your AWS credentials**: Check which AWS user/role you're using:
+   ```bash
+   aws sts get-caller-identity
+   ```
+
+2. **Switch to Terraform service account credentials**: You should be using the Terraform service account credentials, not your personal IAM user credentials. The service account should be part of the `wri-odp-devops` group with appropriate permissions.
+
+3. **Configure AWS credentials**: If using a different profile:
+   ```bash
+   export AWS_PROFILE=245948672511_dataExplorerDevsPermissionSet  # or your Terraform service account profile name
+   ```
+   
+   Or update your `~/.aws/credentials` file with the Terraform service account access keys.
+
+4. **Verify bucket access**: Test if you can access the state bucket:
+   ```bash
+   aws s3 ls s3://wri-odp-tfm-state-bucket/
+   ```
+
+5. **Check IAM permissions**: Ensure your IAM user/role has the required S3 and DynamoDB permissions listed above. Contact your AWS administrator if you need these permissions added.
 
 ## Directory Structure
 
@@ -33,7 +78,7 @@ The Terraform setup is organized into two main directories:
 
 ## Usage
 
-### How to deploy
+### Prerequisites
 
 1. Clone the repository locally and ensure that the credentials for the Terraform user are already set up in your environment. You can use the Terraform service account user key (which can be created through IAM) to establish the connection. For example:
 
@@ -51,15 +96,192 @@ aws configure --profile wri-aws-terraform
 
 and enter the Terraform service account credentials from IAM when prompted.
 
-2. Navigate to the `env` directory corresponding to your working environment (e.g., `cd env/dev`).
+1. **Terraform** (v1.0 or later)
+   - Check installation: `terraform version`
+   - Install from: https://www.terraform.io/downloads
 
-3. Add the necessary environment variables in `.auto.tfvars`. Available in the [secrets repo](https://github.com/wri/wri-odp-secrets/blob/main/infrastructure/.auto.tfvars)
+2. **AWS CLI** (v2.0 or later)
+   - Check installation: `aws --version`
+   - Install from: https://aws.amazon.com/cli/
 
-4. Run `terraform plan -var-file=.auto.tfvars`. For example, if you are in the `env/dev` directory, run `terraform plan` after adding `.auto.tfvars`.
+3. **Terraform Service Account Access Keys**
+   - Obtain from your AWS administrator or IAM console
+   - The service account should be part of the `wri-odp-devops` group
+   - Must have permissions to access the state bucket (see [Required IAM Permissions](#required-iam-permissions-for-state-access))
 
-5. Run `terraform apply -var-file=.auto.tfvars` once everything in the plan seems satisfactory.
+### Step-by-Step Guide: Running Terraform Plan on a New Project
 
-These steps will allow you to deploy and manage the infrastructure efficiently.
+Follow these steps to set up and run `terraform plan` for the first time:
+
+#### Step 1: Clone the Repository
+
+```bash
+git clone <repository-url>
+cd wri-odp-infrastructure
+```
+
+#### Step 2: Configure AWS Credentials
+
+You must use the **Terraform service account** credentials (not your personal IAM user).
+
+**Option A: Using AWS CLI Profile (Recommended)**
+
+1. Configure AWS credentials with a named profile:
+   ```bash
+   aws configure --profile terraform
+   ```
+   When prompted, enter:
+   - AWS Access Key ID: [Your Terraform service account access key]
+   - AWS Secret Access Key: [Your Terraform service account secret key]
+   - Default region: `us-east-1`
+   - Default output format: `json`
+
+2. Set the profile as the active profile:
+   ```bash
+   export AWS_PROFILE=terraform
+   ```
+
+**Option B: Using Environment Variables**
+
+```bash
+export AWS_ACCESS_KEY_ID="your-access-key-id"
+export AWS_SECRET_ACCESS_KEY="your-secret-access-key"
+export AWS_DEFAULT_REGION="us-east-1"
+```
+
+**Verify your credentials:**
+
+```bash
+aws sts get-caller-identity
+```
+
+This should show the Terraform service account user, not a personal IAM user.
+
+**Test state bucket access:**
+
+```bash
+aws s3 ls s3://wri-odp-tfm-state-bucket/
+```
+
+If you get a `403 Forbidden` error, you need to switch to the Terraform service account credentials.
+
+#### Step 3: Navigate to the Environment Directory
+
+```bash
+cd env/dev
+```
+
+Or for other environments: `cd env/staging` or `cd env/prod`
+
+#### Step 4: Create the `.auto.tfvars` File
+
+The `.auto.tfvars` file contains environment-specific variable values. Create it in the environment directory:
+
+> **Note:** The complete `.auto.tfvars` template is available in the [secrets repo](https://github.com/wri/wri-odp-secrets/blob/main/infrastructure/.auto.tfvars). Copy it from there and customize for your environment.
+
+#### Step 5: Initialize Terraform
+
+Initialize Terraform to download required providers and configure the backend:
+
+```bash
+terraform init
+```
+
+This will:
+- Download the required Terraform providers (AWS, etc.)
+- Configure the S3 backend for state storage
+- Set up the remote state configuration
+
+**Expected output:** `Terraform has been successfully initialized!`
+
+If you encounter errors:
+- **Backend initialization error**: Verify AWS credentials and S3 bucket access (see Step 2)
+- **Provider download error**: Check your internet connection
+
+#### Step 6: Run Terraform Plan
+
+Generate and review the execution plan:
+
+```bash
+terraform plan -var-file=.auto.tfvars
+```
+
+Or simply (since `.auto.tfvars` is automatically loaded):
+
+```bash
+terraform plan
+```
+
+**What to expect:**
+- Terraform will read the configuration files
+- It will connect to AWS to check current state
+- It will generate a plan showing what resources will be created, modified, or destroyed
+- Review the plan carefully before proceeding
+
+**Common plan output sections:**
+- `Plan: X to add, Y to change, Z to destroy`
+- Detailed list of resources and their configurations
+
+#### Step 7: Apply Changes (Optional)
+
+Once you've reviewed the plan and it looks correct, apply the changes:
+
+```bash
+terraform apply -var-file=.auto.tfvars
+```
+
+Or:
+
+```bash
+terraform apply
+```
+
+Terraform will prompt you to confirm. Type `yes` to proceed.
+
+> **Warning:** This will create actual AWS resources and incur costs. Ensure you understand what will be created before applying.
+
+### Quick Reference Commands
+
+```bash
+# Check Terraform version
+terraform version
+
+# Verify AWS credentials
+aws sts get-caller-identity
+
+# Test state bucket access
+aws s3 ls s3://wri-odp-tfm-state-bucket/
+
+# Initialize Terraform
+cd env/dev
+terraform init
+
+# Plan changes
+terraform plan
+
+# Apply changes
+terraform apply
+
+# Destroy infrastructure (use with caution!)
+terraform destroy
+```
+
+### Troubleshooting
+
+**Error: "Error refreshing state: Unable to access object"**
+- See [Troubleshooting State Access Issues](#troubleshooting-state-access-issues)
+- Ensure you're using Terraform service account credentials
+
+**Error: "Backend configuration changed"**
+- If you've modified the backend configuration, run `terraform init -reconfigure`
+
+**Error: "Module not found"**
+- Ensure you're in the correct directory (`env/dev`, `env/staging`, etc.)
+- Run `terraform init` to download modules
+
+**Error: "Variable not set"**
+- Ensure `.auto.tfvars` exists in the environment directory
+- Check that all required variables are defined in the file
 
 ## IAM Users and Service Accounts
 
