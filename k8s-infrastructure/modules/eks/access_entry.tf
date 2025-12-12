@@ -7,6 +7,20 @@ resource "aws_eks_access_entry" "admins" {
   depends_on = [module.eks]
 }
 
+resource "aws_eks_access_policy_association" "admins" {
+  cluster_name  = var.cluster_name
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+  principal_arn = module.eks_admins_iam_role.iam_role_arn
+
+  access_scope {
+    type = "cluster"
+  }
+
+  depends_on = [
+    aws_eks_access_entry.admins
+  ]
+}
+
 data aws_iam_roles admin_arn {
   name_regex = "^AWSReservedSSO_AWSAdministratorAccess_(?P<slug>[0-9a-f]{16})$$"
   path_prefix = "/aws-reserved/sso.amazonaws.com/"
@@ -26,7 +40,7 @@ resource "aws_eks_access_policy_association" "admin_policy" {
   for_each = data.aws_iam_roles.admin_arn.arns
 
   cluster_name  = var.cluster_name
-  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSAdminPolicy"
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
   principal_arn = each.value
 
   access_scope {
