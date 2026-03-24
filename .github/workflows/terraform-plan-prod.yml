@@ -1,0 +1,98 @@
+name: Terraform Plan Prod
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "env/prod/**"
+      - "k8s-infrastructure/**"
+      - ".github/workflows/terraform-plan-prod.yml"
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+env:
+  AWS_REGION: "us-east-1"
+
+jobs:
+  terraform-plan-prod:
+    name: "Terraform Plan Prod"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.14.7"
+
+      - name: Terraform Init
+        working-directory: env/prod
+        run: terraform init -input=false
+
+      - name: Terraform Validate
+        working-directory: env/prod
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        working-directory: env/prod
+        run: |
+          terraform plan -no-color -input=false 2>&1 | tee plan_output.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+        continue-on-error: true
+
+      - name: Post plan to PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const env = 'prod';
+            const exitCode = '${{ steps.plan.outputs.exit_code }}';
+            const icon = exitCode === '0' ? '✅' : '❌';
+
+            let plan = fs.readFileSync(
+              `${process.env.GITHUB_WORKSPACE}/env/${env}/plan_output.txt`,
+              'utf8'
+            );
+
+            const MAX_LEN = 60000;
+            if (plan.length > MAX_LEN) {
+              plan = plan.substring(0, MAX_LEN) + '\n\n... (truncated)';
+            }
+
+            const body = [
+              `#### ${icon} Terraform Plan — \`${env}\``,
+              '',
+              '<details>',
+              `<summary>Show plan output</summary>`,
+              '',
+              '```',
+              plan,
+              '```',
+              '',
+              '</details>',
+              '',
+              `*Triggered by @${context.actor} in #${context.issue.number}*`,
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+      - name: Fail if plan errored
+        if: steps.plan.outputs.exit_code != '0'
+        run: exit 1
