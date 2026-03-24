@@ -7,7 +7,7 @@ module "eks" {
   authentication_mode             = "API_AND_CONFIG_MAP"
   endpoint_private_access         = true
   endpoint_public_access          = true
-  kubernetes_version              = 1.32
+  kubernetes_version              = 1.35
   vpc_id                          = var.vpc_id
   subnet_ids                      = var.subnet_ids
   enable_irsa                     = true

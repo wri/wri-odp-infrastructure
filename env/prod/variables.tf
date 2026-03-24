@@ -46,7 +46,9 @@ variable "cluster_issuer" {
   }
 }
 
-variable "project_env" {}
+variable "project_env" {
+  default = "prod"
+}
 
 variable "availability_zones" {
   default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
@@ -85,4 +87,6 @@ variable "ecr_repositories" {
   default = ["ckan-ecr", "frontend-ecr", "datapusher-ecr"]
 }
 
-variable "csi_driver_addon_version" {}
+variable "csi_driver_addon_version" {
+  default = "v1.32.0-eksbuild.1"
+}
