@@ -5,7 +5,7 @@ variable "s3_ckan_storage" {
   default = "storage"
 }
 variable "s3_cluster_name" {
-  default = "ckan-dev"
+  default = "ckan-prod"
 }
 
 variable "postgres" {
