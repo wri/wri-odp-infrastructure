@@ -63,38 +63,24 @@ module "eks" {
   }
 }
 
-data "aws_eks_cluster" "default" {
-  #name = module.eks.cluster_name
-  name = var.cluster_name
-  #depends_on = [module.eks.cluster_name]
-}
-
 data "aws_eks_cluster_auth" "default" {
-  #name = module.eks.cluster_name
-  name = var.cluster_name
-  #depends_on = [module.eks.cluster_name]
+  name = module.eks.cluster_name
 }
 
 provider "kubernetes" {
-  host                   = data.aws_eks_cluster.default.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.default.certificate_authority[0].data)
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
   token                  = data.aws_eks_cluster_auth.default.token
-
-  #exec {
-  #  api_version = "client.authentication.k8s.io/v1"
-  #  args        = ["eks", "get-token", "--cluster-name", var.cluster_name]
-  #  command     = "aws"
-  #}
 }
 
 output "eks_oidc" {
   value = module.eks.oidc_provider_arn
 }
 
-output "aws_eks_cluster" {
-  value = data.aws_eks_cluster.default
+output "aws_eks_cluster_endpoint" {
+  value = module.eks.cluster_endpoint
 }
 
-output "aws_eks_cluster_auth" {
-  value = data.aws_eks_cluster_auth.default
+output "aws_eks_cluster_name" {
+  value = module.eks.cluster_name
 }
