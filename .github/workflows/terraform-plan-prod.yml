@@ -30,6 +30,13 @@ jobs:
           role-to-assume: ${{ vars.OIDC_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Create AWS profile for Terraform
+        run: |
+          aws configure set aws_access_key_id     "$AWS_ACCESS_KEY_ID"     --profile wri-aws-terraform
+          aws configure set aws_secret_access_key  "$AWS_SECRET_ACCESS_KEY" --profile wri-aws-terraform
+          aws configure set aws_session_token      "$AWS_SESSION_TOKEN"     --profile wri-aws-terraform
+          aws configure set region                 "$AWS_REGION"            --profile wri-aws-terraform
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
