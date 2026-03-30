@@ -79,12 +79,12 @@ variable "sg_rds_cidr_block" {
 
 variable "bucket_names" {
   type    = list(string)
-  default = ["ckan-dev-storage"]
+  default = ["ckan-prod-storage"]
 }
 
 variable "ecr_repositories" {
   type    = list(string)
-  default = ["ckan-ecr", "frontend-ecr", "datapusher-ecr"]
+  default = []
 }
 
 variable "csi_driver_addon_version" {
