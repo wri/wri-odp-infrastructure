@@ -90,3 +90,9 @@ variable "ecr_repositories" {
 variable "csi_driver_addon_version" {
   default = "v1.32.0-eksbuild.1"
 }
+
+variable "kubernetes_version" {
+  type        = string
+  description = "Kubernetes version for the EKS cluster."
+  default     = "1.35"
+}
