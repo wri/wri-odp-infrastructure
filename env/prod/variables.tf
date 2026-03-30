@@ -10,7 +10,7 @@ variable "s3_cluster_name" {
 
 variable "postgres" {
   default = {
-    instance_name         = "dx-ckan-db"
+    instance_name         = "dx-ckan-db-prod"
     family                = "postgres15"
     instance_class        = "db.m5.large"
     instance_version      = "15.12"
