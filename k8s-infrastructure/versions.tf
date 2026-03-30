@@ -1,8 +1,3 @@
-provider "aws" {
-  region = var.aws_region
-  profile = "wri-aws-terraform"
-}
-
 terraform {
   required_providers {
     aws = {

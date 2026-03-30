@@ -9,8 +9,7 @@ terraform {
 }
 
 provider "aws" {
-  region  = var.aws_region
-  profile = "wri-aws-terraform"
+  region = var.aws_region
 }
 
 module "infrastructure" {
