@@ -1,5 +1,9 @@
 name: Terraform Prod
 
+concurrency:
+  group: terraform-prod
+  cancel-in-progress: false
+
 on:
   pull_request:
     branches: [main]
@@ -18,6 +22,7 @@ permissions:
   id-token: write
   contents: read
   pull-requests: write
+  actions: read
 
 env:
   AWS_REGION: "us-east-1"
@@ -42,6 +47,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
 
       - name: Terraform Init
         working-directory: env/prod
@@ -55,9 +61,18 @@ jobs:
         id: plan
         working-directory: env/prod
         run: |
-          terraform plan -no-color -input=false 2>&1 | tee plan_output.txt
+          set -o pipefail
+          terraform plan -no-color -input=false -out=tfplan 2>&1 | tee plan_output.txt
           echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
         continue-on-error: true
+
+      - name: Upload plan artifact
+        if: steps.plan.outputs.exit_code == '0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-prod
+          path: env/prod/tfplan
+          retention-days: 7
 
       - name: Post plan to PR
         uses: actions/github-script@v7
@@ -65,12 +80,11 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const env = 'prod';
             const exitCode = '${{ steps.plan.outputs.exit_code }}';
             const icon = exitCode === '0' ? '✅' : '❌';
 
             let plan = fs.readFileSync(
-              `${process.env.GITHUB_WORKSPACE}/env/${env}/plan_output.txt`,
+              `${process.env.GITHUB_WORKSPACE}/env/prod/plan_output.txt`,
               'utf8'
             );
 
@@ -80,7 +94,7 @@ jobs:
             }
 
             const body = [
-              `#### ${icon} Terraform Plan — \`${env}\``,
+              `#### ${icon} Terraform Plan — \`prod\``,
               '',
               '<details>',
               `<summary>Show plan output</summary>`,
@@ -109,6 +123,7 @@ jobs:
     name: "Terraform Apply Prod"
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -123,11 +138,38 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
 
       - name: Terraform Init
         working-directory: env/prod
         run: terraform init -input=false
 
+      - name: Download plan from PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=$(gh api \
+            "repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" \
+            --jq '.[0].number')
+
+          if [ -z "$PR_NUMBER" ]; then
+            echo "::error::Could not find PR for commit ${{ github.sha }}"
+            exit 1
+          fi
+          echo "Found PR #${PR_NUMBER}"
+
+          RUN_ID=$(gh api \
+            "repos/${{ github.repository }}/actions/workflows/terraform-plan-prod.yml/runs?event=pull_request&status=success&per_page=20" \
+            --jq "[.workflow_runs[] | select(.pull_requests[].number == ${PR_NUMBER})] | .[0].id")
+
+          if [ -z "$RUN_ID" ] || [ "$RUN_ID" = "null" ]; then
+            echo "::error::No successful plan run found for PR #${PR_NUMBER}"
+            exit 1
+          fi
+          echo "Downloading plan from run ${RUN_ID}"
+
+          gh run download "$RUN_ID" --name tfplan-prod --dir env/prod
+
       - name: Terraform Apply
         working-directory: env/prod
-        run: terraform apply -auto-approve -input=false
+        run: terraform apply -input=false tfplan
