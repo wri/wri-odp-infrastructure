@@ -22,11 +22,11 @@ permissions:
   id-token: write
   contents: read
   pull-requests: write
-  actions: read
 
 env:
   AWS_REGION: "us-east-1"
   TF_VERSION: "1.14.8"
+  PLAN_BUCKET: "wri-odp-tfm-state-bucket"
 
 jobs:
   terraform-plan:
@@ -63,16 +63,13 @@ jobs:
         run: |
           set -o pipefail
           terraform plan -no-color -input=false -out=tfplan 2>&1 | tee plan_output.txt
-          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
         continue-on-error: true
 
-      - name: Upload plan artifact
-        if: steps.plan.outputs.exit_code == '0'
-        uses: actions/upload-artifact@v4
-        with:
-          name: tfplan-prod
-          path: env/prod/tfplan
-          retention-days: 7
+      - name: Upload plan to S3
+        if: success()
+        run: |
+          aws s3 cp env/prod/tfplan \
+            "s3://${{ env.PLAN_BUCKET }}/tfplans/prod/pr-${{ github.event.pull_request.number }}/tfplan"
 
       - name: Post plan to PR
         uses: actions/github-script@v7
@@ -80,8 +77,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const exitCode = '${{ steps.plan.outputs.exit_code }}';
-            const icon = exitCode === '0' ? '✅' : '❌';
+            const planOk = '${{ steps.plan.outcome }}' === 'success';
+            const icon = planOk ? '✅' : '❌';
 
             let plan = fs.readFileSync(
               `${process.env.GITHUB_WORKSPACE}/env/prod/plan_output.txt`,
@@ -116,7 +113,7 @@ jobs:
             });
 
       - name: Fail if plan errored
-        if: steps.plan.outputs.exit_code != '0'
+        if: steps.plan.outcome != 'success'
         run: exit 1
 
   terraform-apply:
@@ -144,7 +141,7 @@ jobs:
         working-directory: env/prod
         run: terraform init -input=false
 
-      - name: Download plan from PR
+      - name: Download plan from S3
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -158,17 +155,9 @@ jobs:
           fi
           echo "Found PR #${PR_NUMBER}"
 
-          RUN_ID=$(gh api \
-            "repos/${{ github.repository }}/actions/workflows/terraform-plan-prod.yml/runs?event=pull_request&status=success&per_page=20" \
-            --jq "[.workflow_runs[] | select(.pull_requests[].number == ${PR_NUMBER})] | .[0].id")
-
-          if [ -z "$RUN_ID" ] || [ "$RUN_ID" = "null" ]; then
-            echo "::error::No successful plan run found for PR #${PR_NUMBER}"
-            exit 1
-          fi
-          echo "Downloading plan from run ${RUN_ID}"
-
-          gh run download "$RUN_ID" --name tfplan-prod --dir env/prod
+          aws s3 cp \
+            "s3://${{ env.PLAN_BUCKET }}/tfplans/prod/pr-${PR_NUMBER}/tfplan" \
+            env/prod/tfplan
 
       - name: Terraform Apply
         working-directory: env/prod
