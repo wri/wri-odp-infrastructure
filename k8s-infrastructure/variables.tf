@@ -86,3 +86,9 @@ variable "ecr_repositories" {
 }
 
 variable "csi_driver_addon_version"{}
+
+variable "kubernetes_version" {
+  type        = string
+  description = "Kubernetes version for the EKS cluster."
+  default     = "1.35"
+}

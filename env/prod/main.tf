@@ -2,14 +2,14 @@ terraform {
   backend "s3" {
     bucket         = "wri-odp-tfm-state-bucket"
     dynamodb_table = "tfm-state-lock"
-    key            = "global/statefile/terraform.state"
+    key            = "prod/statefile/terraform.state"
     region         = "us-east-1"
     encrypt        = true
   }
 }
 
 provider "aws" {
-  region = var.aws_region
+  region  = var.aws_region
 }
 
 module "infrastructure" {

@@ -19,7 +19,7 @@ module "ckan_eks" {
   cluster_issuer = var.cluster_issuer
   project_env    = var.project_env
   csi_driver_addon_version = var.csi_driver_addon_version
-
+  kubernetes_version       = var.kubernetes_version
 }
 
 module "ckan_rds" {

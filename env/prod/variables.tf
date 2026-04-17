@@ -5,12 +5,12 @@ variable "s3_ckan_storage" {
   default = "storage"
 }
 variable "s3_cluster_name" {
-  default = "ckan-dev"
+  default = "ckan-prod"
 }
 
 variable "postgres" {
   default = {
-    instance_name         = "dx-ckan-db"
+    instance_name         = "dx-ckan-db-prod"
     family                = "postgres15"
     instance_class        = "db.m5.large"
     instance_version      = "15.12"
@@ -46,7 +46,9 @@ variable "cluster_issuer" {
   }
 }
 
-variable "project_env" {}
+variable "project_env" {
+  default = "prod"
+}
 
 variable "availability_zones" {
   default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
@@ -77,18 +79,20 @@ variable "sg_rds_cidr_block" {
 
 variable "bucket_names" {
   type    = list(string)
-  default = ["ckan-dev-storage"]
+  default = ["ckan-prod-storage"]
 }
 
 variable "ecr_repositories" {
   type    = list(string)
-  default = ["ckan-ecr", "frontend-ecr", "datapusher-ecr"]
+  default = []
 }
 
-variable "csi_driver_addon_version" {}
+variable "csi_driver_addon_version" {
+  default = "v1.32.0-eksbuild.1"
+}
 
 variable "kubernetes_version" {
   type        = string
   description = "Kubernetes version for the EKS cluster."
-  default     = "1.32"
+  default     = "1.35"
 }
