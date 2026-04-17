@@ -69,7 +69,7 @@ jobs:
         if: success()
         run: |
           aws s3 cp env/prod/tfplan \
-            "s3://${{ env.PLAN_BUCKET }}/tfplans/prod/pr-${{ github.event.pull_request.number }}/tfplan"
+            "s3://${{ env.PLAN_BUCKET }}/wri-odp-infrastructure/prod/pr-${{ github.event.pull_request.number }}/tfplan"
 
       - name: Post plan to PR
         uses: actions/github-script@v7
@@ -156,7 +156,7 @@ jobs:
           echo "Found PR #${PR_NUMBER}"
 
           aws s3 cp \
-            "s3://${{ env.PLAN_BUCKET }}/tfplans/prod/pr-${PR_NUMBER}/tfplan" \
+            "s3://${{ env.PLAN_BUCKET }}/wri-odp-infrastructure/prod/pr-${PR_NUMBER}/tfplan" \
             env/prod/tfplan
 
       - name: Terraform Apply
