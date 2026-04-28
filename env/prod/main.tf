@@ -29,6 +29,3 @@ module "infrastructure" {
   csi_driver_addon_version   = var.csi_driver_addon_version
   kubernetes_version         = var.kubernetes_version
 }
-
-
-
