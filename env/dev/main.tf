@@ -4,7 +4,6 @@ terraform {
     key            = "global/statefile/terraform.state"
     region         = "us-east-1"
     encrypt        = true
-    use_lockfile   = true
   }
 }
 
