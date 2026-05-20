@@ -1,5 +1,5 @@
 provider "helm" {
-  kubernetes =   {
+  kubernetes = {
     host                   = module.eks.cluster_endpoint
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
     token                  = data.aws_eks_cluster_auth.default.token
@@ -23,35 +23,30 @@ resource "helm_release" "ngnix_ingress" {
   repository = "https://kubernetes.github.io/ingress-nginx"
   namespace  = "nginx-ingress"
 
-  set = [ {
+  set = [{
     name  = "rbac.create"
     value = true
-  },
-  {
-    name  = "controller.service.externalTrafficPolicy"
-    value = "Local"
-  },
-  {
-    name  = "controller.publishService.enabled"
-    value = true
-  },
-  {
-    name  = "controller.replicaCount"
-    value = "3"
+    },
+    {
+      name  = "controller.service.externalTrafficPolicy"
+      value = "Local"
+    },
+    {
+      name  = "controller.publishService.enabled"
+      value = true
+    },
+    {
+      name  = "controller.replicaCount"
+      value = "3"
   }]
-} 
+}
 
 
 variable "cluster_issuer" {
   type = object({
     #private_key = string
-    email       = string
+    email = string
   })
 }
 
-module "cert_manager" {
-  source                                 = "terraform-iaac/cert-manager/kubernetes"
-  version                                = "3.0.1"
-  cluster_issuer_email                   = var.cluster_issuer.email
-  #cluster_issuer_private_key_secret_name = var.cluster_issuer.private_key
-}
+# cert-manager + ClusterIssuer are defined in cert-manager.tf.
