@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: {{ .Values.name | quote }}
+spec:
+  acme:
+    server: {{ .Values.server | quote }}
+    preferredChain: {{ .Values.preferredChain | quote }}
+    email: {{ required "cluster_issuer.email is required" .Values.email | quote }}
+    privateKeySecretRef:
+      name: {{ .Values.privateKeySecretRef.name | quote }}
+    solvers:
+{{ toYaml .Values.solvers | indent 6 }}
