@@ -1,7 +1,6 @@
 terraform {
   backend "s3" {
     bucket         = "wri-odp-tfm-state-bucket"
-    dynamodb_table = "tfm-state-lock"
     key            = "prod/statefile/terraform.state"
     region         = "us-east-1"
     encrypt        = true
@@ -29,6 +28,3 @@ module "infrastructure" {
   csi_driver_addon_version   = var.csi_driver_addon_version
   kubernetes_version         = var.kubernetes_version
 }
-
-
-
