@@ -4,7 +4,11 @@
 # .tfstate files
 *.tfstate
 *.tfstate.*
-*.lock.hcl
+
+# Terraform dependency lock files (.terraform.lock.hcl) MUST be committed
+# so that plan/apply CI jobs resolve identical provider versions.
+# See https://developer.hashicorp.com/terraform/language/files/dependency-lock
+!.terraform.lock.hcl
 
 # Crash log files
 crash.log

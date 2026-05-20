@@ -51,7 +51,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: env/prod
-        run: terraform init -input=false
+        run: terraform init -input=false -lockfile=readonly
 
       - name: Terraform Validate
         working-directory: env/prod
@@ -139,7 +139,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: env/prod
-        run: terraform init -input=false
+        run: terraform init -input=false -lockfile=readonly
 
       - name: Download plan from S3
         env:
