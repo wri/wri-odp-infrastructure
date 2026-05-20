@@ -92,3 +92,9 @@ variable "kubernetes_version" {
   description = "Kubernetes version for the EKS cluster."
   default     = "1.35"
 }
+
+variable "cluster_admin_role_arns" {
+  type        = list(string)
+  description = "Additional IAM role ARNs that should receive cluster-admin access via EKS Access Entries (e.g. SSO admin role, GitHub Actions OIDC role)."
+  default     = []
+}

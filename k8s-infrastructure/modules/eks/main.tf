@@ -14,23 +14,45 @@ module "eks" {
 
   addons = {
     vpc-cni = {
-      most_recent = true
-      resolve_conflicts_on_create = "OVERWRITE"
+      most_recent                 = true
+      resolve_conflicts_on_create  = "OVERWRITE"
+      # Install the VPC CNI before the managed node group is created so the
+      # first node has a working pod network and can reach Ready.
+      before_compute = true
     },
     kube-proxy = {
-      most_recent = true
-      resolve_conflicts_on_create = "OVERWRITE"
+      most_recent                 = true
+      resolve_conflicts_on_create  = "OVERWRITE"
+      before_compute = true
     },
     coredns = {
-      most_recent = true
-      resolve_conflicts_on_create = "OVERWRITE"
+      most_recent                 = true
+      resolve_conflicts_on_create  = "OVERWRITE"
     }
   }
 
   iam_role_additional_policies = {
     eks_vpccontroller = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
   }
-  
+
+  # We explicitly enumerate admins via cluster_admin_role_arns so the set of
+  # cluster admins is independent of which principal happens to run Terraform.
+  enable_cluster_creator_admin_permissions = false
+
+  access_entries = {
+    for arn in var.cluster_admin_role_arns : "admin-${md5(arn)}" => {
+      principal_arn = arn
+      policy_associations = {
+        cluster_admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+  }
+
   eks_managed_node_groups = {
     # Starting on 1.30, AL2023 is the default AMI type for EKS managed node groups
     one = {
@@ -55,6 +77,9 @@ module "eks" {
 
       iam_role_additional_policies = {
         cni_policy = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+        # Enables SSM Session Manager into nodes for `journalctl -u kubelet`
+        # debugging when a node fails to join.
+        ssm_core = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
       }
     }
   }

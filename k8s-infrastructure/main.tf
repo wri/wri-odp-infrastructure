@@ -20,6 +20,7 @@ module "ckan_eks" {
   project_env    = var.project_env
   csi_driver_addon_version = var.csi_driver_addon_version
   kubernetes_version       = var.kubernetes_version
+  cluster_admin_role_arns  = var.cluster_admin_role_arns
 }
 
 module "ckan_rds" {

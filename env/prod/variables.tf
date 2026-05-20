@@ -57,7 +57,11 @@ variable "availability_zones" {
 
 
 variable "private_subnet_cidr_blocks" {
-  default     = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+  # /20 (~4091 usable IPs each) so the VPC CNI warm-IP pool on
+  # t3.xlarge node groups doesn't exhaust the subnet. The previous /24s
+  # only had ~251 IPs each, which causes NodeCreationFailure when a few
+  # nodes are launched per AZ.
+  default     = ["10.0.16.0/20", "10.0.32.0/20", "10.0.48.0/20"]
   description = "A list of CIDR ranges for private subnets."
 }
 
@@ -95,4 +99,16 @@ variable "kubernetes_version" {
   type        = string
   description = "Kubernetes version for the EKS cluster."
   default     = "1.35"
+}
+
+variable "cluster_admin_role_arns" {
+  type        = list(string)
+  description = "IAM role ARNs to grant cluster-admin on the EKS cluster via Access Entries."
+  default = [
+    # SSO admin role used by humans for break-glass kubectl access.
+    # Update the random suffix if AWS Identity Center is recreated.
+    "arn:aws:iam::245948672511:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AWSAdministratorAccess_69d61212ea5659d4",
+    # GitHub Actions OIDC role used by CI to deploy to the cluster.
+    "arn:aws:iam::245948672511:role/github-actions-oidc-role",
+  ]
 }
