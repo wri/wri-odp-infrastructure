@@ -92,7 +92,10 @@ variable "ecr_repositories" {
 }
 
 variable "csi_driver_addon_version" {
-  default = "v1.32.0-eksbuild.1"
+  # Empty string => auto-resolve the most-recent build compatible with the
+  # cluster's Kubernetes version (see modules/eks/csi-driver-addons.tf). Pin a
+  # specific build here only if you need to freeze the addon version.
+  default = ""
 }
 
 variable "kubernetes_version" {
