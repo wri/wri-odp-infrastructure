@@ -29,6 +29,15 @@ resource "helm_release" "ngnix_ingress" {
   namespace        = "nginx-ingress"
   create_namespace = true
 
+  # Helm waits for the controller Deployment to be Available AND for the
+  # LoadBalancer Service to receive an ELB hostname. On a brand-new VPC the very
+  # first Classic ELB can take longer than the 300s default, which surfaces as
+  # "context deadline exceeded". Give it more headroom and clean up partial
+  # resources on failure so re-runs aren't blocked by a stuck release.
+  timeout         = 600
+  wait            = true
+  cleanup_on_fail = true
+
   set = [{
     name  = "rbac.create"
     value = true

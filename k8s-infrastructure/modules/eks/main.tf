@@ -72,7 +72,14 @@ module "eks" {
       #  update = "240m"
       #}
 
-      attach_cluster_primary_security_group = true
+      # Do NOT attach the EKS cluster primary security group to the nodes. Both
+      # the cluster primary SG (eks-cluster-sg-*) and the module's node SG
+      # (ckan-prod-node-*) carry the `kubernetes.io/cluster/<name>` tag. The AWS
+      # in-tree cloud-controller-manager (used for `Service type=LoadBalancer`,
+      # e.g. nginx-ingress) picks the SG to manage by that tag and fails with
+      # "Multiple tagged security groups found for instance ..." when more than
+      # one is present. Leaving only the module node SG attached resolves it.
+      attach_cluster_primary_security_group = false
       create_security_group                 = false
 
       iam_role_additional_policies = {
