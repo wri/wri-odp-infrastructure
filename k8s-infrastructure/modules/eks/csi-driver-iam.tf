@@ -22,7 +22,11 @@ data "aws_iam_policy_document" "csi" {
 
 resource "aws_iam_role" "eks_ebs_csi_driver" {
   assume_role_policy = data.aws_iam_policy_document.csi.json
-  name               = "eks-ebs-csi-driver"
+  # IAM role names are global per AWS account. Dev created `eks-ebs-csi-driver`
+  # first; keep that exact name in dev for backward compatibility, and suffix
+  # any other environment so each cluster gets its own role bound to its own
+  # OIDC issuer without colliding.
+  name = var.project_env == "dev" ? "eks-ebs-csi-driver" : "eks-ebs-csi-driver-${var.project_env}"
 }
 
 resource "aws_iam_role_policy_attachment" "amazon_ebs_csi_driver" {
