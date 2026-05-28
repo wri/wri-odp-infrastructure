@@ -18,10 +18,11 @@ resource "helm_release" "sealed_secrets" {
 }
 
 resource "helm_release" "ngnix_ingress" {
-  name       = "nginx-ingress-production"
-  chart      = "ingress-nginx"
-  repository = "https://kubernetes.github.io/ingress-nginx"
-  namespace  = "nginx-ingress"
+  name             = "nginx-ingress-production"
+  chart            = "ingress-nginx"
+  repository       = "https://kubernetes.github.io/ingress-nginx"
+  namespace        = "nginx-ingress"
+  create_namespace = true
 
   set = [{
     name  = "rbac.create"

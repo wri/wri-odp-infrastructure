@@ -33,8 +33,21 @@ data aws_iam_roles admin_arn {
   path_prefix = "/aws-reserved/sso.amazonaws.com/"
 }
 
+# Regex-driven SSO admin discovery. This was the original mechanism for
+# granting the SSO admin role cluster access. It is now duplicated by the EKS
+# module's `access_entries` block in main.tf (which loops over
+# `var.cluster_admin_role_arns` and creates an entry per ARN). When the caller
+# opts into the explicit list, skip the regex-driven entries to avoid
+# `ResourceInUseException: access entry resource is already in use`.
+#
+# Dev currently does not pass `cluster_admin_role_arns`, so the for_each here
+# still discovers the SSO role and keeps its existing entry untouched.
+locals {
+  use_regex_admin_entries = length(var.cluster_admin_role_arns) == 0
+}
+
 resource "aws_eks_access_entry" "admin_role" {
-  for_each = data.aws_iam_roles.admin_arn.arns
+  for_each = local.use_regex_admin_entries ? data.aws_iam_roles.admin_arn.arns : toset([])
 
   cluster_name  = var.cluster_name
   principal_arn = each.value
@@ -44,7 +57,7 @@ resource "aws_eks_access_entry" "admin_role" {
 }
 
 resource "aws_eks_access_policy_association" "admin_policy" {
-  for_each = data.aws_iam_roles.admin_arn.arns
+  for_each = local.use_regex_admin_entries ? data.aws_iam_roles.admin_arn.arns : toset([])
 
   cluster_name  = var.cluster_name
   policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
