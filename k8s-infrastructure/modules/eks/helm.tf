@@ -1,8 +1,13 @@
+# Auth uses exec (aws eks get-token) only, never a static token. EKS tokens
+# expire after 15 minutes, and this repo's workflow saves a plan during the PR
+# job and applies it later in a separate job (`terraform apply tfplan`). A saved
+# plan does not re-read data sources, so a baked `data.aws_eks_cluster_auth`
+# token is always expired by apply time, yielding 401 "the server has asked for
+# the client to provide credentials". exec fetches a fresh token at apply time.
 provider "helm" {
   kubernetes = {
     host                   = module.eks.cluster_endpoint
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-    token                  = data.aws_eks_cluster_auth.default.token
     exec = {
       api_version = "client.authentication.k8s.io/v1beta1"
       args        = ["eks", "get-token", "--cluster-name", var.cluster_name]
